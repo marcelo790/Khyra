@@ -1,8 +1,11 @@
-import React from 'react'
+import React from 'react';
+import useAdministradores from '../hooks/useAdministradores';
 
 const Administrador = () => {
   return (
-    <div>Administrador</div>
+    <>
+      <h1 className='text-4xl font-black'>Administrador</h1>
+    </>
   )
 }
 

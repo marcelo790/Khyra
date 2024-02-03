@@ -1,4 +1,5 @@
 import {AuthProvider} from './context/AuthProvider';
+import { AdministradorProvider } from './context/AdministradorProvider';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthLayout from "./layouts/AuthLayout";
 import Login from "./page/Login";
@@ -8,25 +9,28 @@ import NuevoPassword from "./page/NuevoPassword";
 import ConfirmarCuenta from "./page/ConfirmarCuenta";
 import RutaProtegida from './layouts/RutaProtegida';
 import Administrador from './page/Administrador';
+import ListaUsuarios from './page/ListaUsuarios';
 
 function App() {
 
   return (    
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<AuthLayout/>}>
-              <Route index element={<Login/>}/>
-              <Route path="registrar" element={<RegistrarUsuario/>}/>
-              <Route path="olvide-password" element={<OlvidePassword/>}/>
-              <Route path="olvide-password/:token" element={<NuevoPassword/>}/>
-              <Route path="confirmar/:id" element={<ConfirmarCuenta/>}/>
+          <AdministradorProvider>
+            <Routes>
+              <Route path="/" element={<AuthLayout/>}>
+                <Route index element={<Login/>}/>
+                <Route path="olvide-password" element={<OlvidePassword/>}/>
+                <Route path="olvide-password/:token" element={<NuevoPassword/>}/>
+                <Route path="confirmar/:id" element={<ConfirmarCuenta/>}/>
 
-            </Route>
-            <Route path="/panel" element={<RutaProtegida/>}>
-              <Route index element={<Administrador/>}/>
-            </Route>
-          </Routes>
+              </Route>
+              <Route path="/panel" element={<RutaProtegida/>}>
+                <Route index element={<Administrador/>}/>                
+                <Route path="lista-usuarios" element={<ListaUsuarios/>}/>
+              </Route>
+            </Routes>
+          </AdministradorProvider>
         </AuthProvider>
       </BrowserRouter>
   )
