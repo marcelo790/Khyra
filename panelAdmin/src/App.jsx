@@ -10,6 +10,7 @@ import ConfirmarCuenta from "./page/ConfirmarCuenta";
 import RutaProtegida from './layouts/RutaProtegida';
 import Administrador from './page/Administrador';
 import ListaUsuarios from './page/ListaUsuarios';
+import "tw-elements-react/dist/css/tw-elements-react.min.css";
 
 function App() {
 
@@ -25,9 +26,10 @@ function App() {
                 <Route path="confirmar/:id" element={<ConfirmarCuenta/>}/>
 
               </Route>
-              <Route path="/panel" element={<RutaProtegida/>}>
+              <Route path="/admin" element={<RutaProtegida/>}>
                 <Route index element={<Administrador/>}/>                
                 <Route path="lista-usuarios" element={<ListaUsuarios/>}/>
+                <Route path="lista-usuarios/:id" element={<ListaUsuarios/>}/>
               </Route>
             </Routes>
           </AdministradorProvider>

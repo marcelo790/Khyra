@@ -38,6 +38,10 @@ const usuarioSchema = mongoose.Schema(
             type: Boolean,
             default: false
         },
+        rol:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Role'
+        }
     },
     {
         timestamps: true
@@ -55,6 +59,7 @@ usuarioSchema.pre('save', async function(next){
 usuarioSchema.methods.comprobarPassword = async function(passwordFormulario){
     return await bcrypt.compare(passwordFormulario, this.password);
 }
+
 
 const Usuario = mongoose.model("User", usuarioSchema);
 export default Usuario;

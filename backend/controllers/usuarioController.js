@@ -1,4 +1,5 @@
 import Usuario from '../models/Usuario.js';
+import Rol from '../models/Rol.js';
 import generarId from '../helpers/generarId.js';
 import generarJwt from '../helpers/generarJwt.js';
 import { emailRegistro, emailOlvidePassword } from '../helpers/email.js';
@@ -6,8 +7,9 @@ import { emailRegistro, emailOlvidePassword } from '../helpers/email.js';
 
 const registrar = async (req, res) => {
     //Evitar registros duplicados
-    const {email} = req.body;
+    const {email,rol} = req.body;
     const existeUsuario = await Usuario.findOne({email : email });
+    const existeRol = await Rol.findById(rol);
     
     if(existeUsuario){
         const error = new Error('Usuario ya registrado');
@@ -16,18 +18,76 @@ const registrar = async (req, res) => {
     try {
         const usuario = new Usuario(req.body);
         usuario.token = generarId();
-        await usuario.save();
-        //Enviar email de confirmación
-        emailRegistro({
-            email: usuario.email,
-            nombre: usuario.nombre,
-            token: usuario.token
-        })
-        res.json({msg: 'Usuario Creado Correctamente, Revisa tu correo electronico para confirmar tu cuenta'});
+        if(existeRol){
+            usuario.rol = existeRol;
+            const usuarioAlmacenado = await usuario.save();
+            //Enviar email de confirmación
+            emailRegistro({
+                email: usuario.email,
+                nombre: usuario.nombre,
+                token: usuario.token
+            });
+            res.json(usuarioAlmacenado);
+        }
+        
     } catch (error) {
         console.log(error);
     }
 };
+
+const listar = async(req, res) => {
+    const usuarios = await Usuario.find().populate('rol');
+    if(!usuarios){
+        const error = new Error("No existen usuarios");
+        return res.status(404).json({msg: error.message})
+    }
+    res.json(usuarios);
+}
+
+const editar = async(req, res) => {
+    const {id} = req.params;
+    const usuario = await Usuario.findById(id);
+    if(!usuario){
+        const error = new Error("No existe usuario");
+        return res.status(404).json({msg: error.message})
+    }
+    usuario.nombre = req.body.nombre || usuario.nombre;
+    usuario.email = req.body.email || usuario.email;
+    usuario.rol = req.body.rol || usuario.rol;
+    try {
+        const usuarioEditado = await usuario.save()
+        res.json(usuarioEditado);
+    } catch (error) {
+        return res.status(404).json({msg: error.message})
+    }
+    
+}
+
+const eliminar = async(req, res) => {
+    const {id} = req.params;
+    const usuario = await Usuario.findById(id);
+    if(!usuario){
+        const error = new Error("No existe usuario");
+        return res.status(404).json({msg: error.message})
+    }
+    try {
+        await usuario.deleteOne();
+        res.json({msg: 'Usuario Eliminado'})
+    } catch (error) {
+        return res.status(404).json({msg: error.message})
+    }
+}
+
+
+const listarByUsuario = async(req, res) => {
+    const {id} = req.params;
+    const usuarios = await Usuario.findById(id).populate('rol');
+    if(!usuarios){
+        const error = new Error("El usuario no existe");
+        return res.status(404).json({msg: error.message})
+    }
+    res.json(usuarios);
+}
 
 
 const autenticar = async (req, res) => {
@@ -150,10 +210,14 @@ const perfil = async (req, res) =>{
 
 export {
     registrar,
+    editar,
+    eliminar,
     autenticar,
     confirmar,
     resetearPassword,
     comprobarToken,
     nuevoPassword,
-    perfil
+    perfil,
+    listar,
+    listarByUsuario
 }

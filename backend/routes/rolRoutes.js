@@ -4,10 +4,10 @@ import { registrarRol, listadoRoles, listadoPermisosByRol, editarRol, eliminarRo
 
 const router = express.Router();
 
-router.get("/",checkAuth, listadoRoles);
-router.post("/",checkAuth, registrarRol);
+router.get("/lista-roles",checkAuth, listadoRoles);
+router.post("/registrar",checkAuth, registrarRol);
 router
-.route("/:id")
+.route("/lista-rol/:id")
 .get(checkAuth, listadoPermisosByRol)
 .put(checkAuth, editarRol)
 .delete(checkAuth, eliminarRol);

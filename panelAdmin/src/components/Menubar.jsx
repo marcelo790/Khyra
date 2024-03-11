@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function Menubar() {
   return (
     <>
-        <aside id="default-sidebar" className=" top-0 left-0  w-full h-screen h-80 transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
+        <aside id="default-sidebar" className=" top-0 left-0  w-full h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
         <div className="h-full py-4 overflow-y-auto bg-white dark:bg-gray-800">
             <ul className="space-y-2 font-medium">
                 <li>
@@ -13,6 +13,14 @@ function Menubar() {
                             <path fillRule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1c0-.6.4-1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clipRule="evenodd"/>
                         </svg>
                         <span className="ms-3 group-hover:text-white dark:hover:bg-white group">Usuarios</span>
+                    </Link>
+                </li>
+                <li>
+                    <Link to="lista-roles" className="flex items-center p-2 text-black rounded-lg dark:text-black hover:bg-orange-600  dark:hover:bg-white group">
+                        <svg className="w-5 h-5 text-black transition duration-75 dark:text-black group-hover:text-white dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" strokeLinecap="square" strokeLinejoin="round" strokeWidth="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.1 1.9-.7-.7m5.6 5.6-.7-.7m-4.2 0-.7.7m5.6-5.6-.7.7M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                        </svg>
+                        <span className="ms-3 group-hover:text-white dark:hover:bg-white group">Roles</span>
                     </Link>
                 </li>
                 <li>

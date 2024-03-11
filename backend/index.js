@@ -4,6 +4,7 @@ import conectarDB from "./config/db.js";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import rolRoutes from "./routes/rolRoutes.js";
 import permisoRoutes from "./routes/permisoRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import cors from 'cors';
 /*import accionRoutes from "./routes/accionRoutes.js";
 import usuarioFinalRoutes from "./routes/usuarioFinalRoutes.js";
@@ -34,6 +35,7 @@ app.use(cors(corsOption));
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/roles", rolRoutes);
 app.use("/api/permisos", permisoRoutes);
+app.use("/api/admin", adminRoutes);
 /*app.use("/api/historiales", historialRoutes);
 app.use("/api/acciones", accionRoutes);
 app.use("/api/usuariofinal", usuarioFinalRoutes);*/
