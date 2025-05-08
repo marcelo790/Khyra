@@ -24,7 +24,7 @@ const Login = () => {
       return
     }
     try {
-      const {data} = await clienteAxios.post('/usuarios/login',{
+      const {data} = await clienteAxios.post('/user/login',{
         email, password
       });
       setAlerta({})

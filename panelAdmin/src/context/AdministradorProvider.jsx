@@ -33,7 +33,7 @@ const AdministradorProvider = ({children}) =>{
                         Authorization: `Bearer ${token}`
                     }
                 }
-                const {data} = await clienteAxios('/usuarios/lista-usuarios', config);
+                const {data} = await clienteAxios('/user/list-users', config);
                 setUsuarios(data)
             } catch (error) {
                 console.log(error)
@@ -51,7 +51,7 @@ const AdministradorProvider = ({children}) =>{
                         Authorization: `Bearer ${token}`
                     }
                 }
-                const {data} = await clienteAxios('/roles/lista-roles', config);
+                const {data} = await clienteAxios('/rol/list-roles', config);
                 setRoles(data)
             } catch (error) {
                 setAlerta({
@@ -89,7 +89,7 @@ const AdministradorProvider = ({children}) =>{
                     Authorization: `Bearer ${token}`
                 }
             }
-            const {data} = await clienteAxios.put(`/usuarios/editar/${usuario.id}`, usuario, config);
+            const {data} = await clienteAxios.put(`/user/update/${usuario.id}`, usuario, config);
             const usuariosActualizados = usuarios.map(usuarioState => usuarioState._id === data._id ? data : usuarioState)
             setUsuarios(usuariosActualizados);
             setAlerta({
@@ -121,7 +121,7 @@ const AdministradorProvider = ({children}) =>{
                     Authorization: `Bearer ${token}`
                 }
             }
-            const {data} = await clienteAxios.post('/usuarios/registrar', usuario, config);
+            const {data} = await clienteAxios.post('/user/create', usuario, config);
             setUsuarios([...usuarios, data]);
             setAlerta({
                 msg: 'Usuario Creado Correctamente',
@@ -153,7 +153,7 @@ const AdministradorProvider = ({children}) =>{
                     Authorization: `Bearer ${token}`
                 }
             }
-            const {data} = await clienteAxios.delete(`/usuarios/eliminar/${id}`, config);
+            const {data} = await clienteAxios.delete(`/user/delete/${id}`, config);
             const usuariosActualizados = usuarios.filter(usuarioFilter => usuarioFilter._id !== id );
             setUsuarios(usuariosActualizados);
             setAlerta({
@@ -184,7 +184,7 @@ const AdministradorProvider = ({children}) =>{
                     Authorization: `Bearer ${token}`
                 }
             }
-            const {data} = await clienteAxios.get(`/usuarios/lista-usuarios/${id}`, config);
+            const {data} = await clienteAxios.get(`/user/list-users/${id}`, config);
             setUsuario(data)
         } catch (error) {
             setAlerta({

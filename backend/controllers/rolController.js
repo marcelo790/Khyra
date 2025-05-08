@@ -25,11 +25,11 @@ const listadoPermisosByRol = async(req, res) => {
         const error = new Error("Rol no encontrado")
         return res.status(404).json({msg: error.message});
     }
-    if(!rol.permisos || rol.permisos.length <= 0){
+    if(!rol.permission || rol.permission.length <= 0){
         const error = new Error("El rol seleccionado no tiene permisos");
         return res.status(404).json({msg: error.message});
     }
-    res.json(rol.permisos);
+    res.json(rol.permission);
 }
 
 const editarRol = async(req, res) =>{
@@ -41,8 +41,8 @@ const editarRol = async(req, res) =>{
         return res.status(404).json({msg: error.message});
     }
 
-    rol.nombre = req.body.nombre || rol.nombre;
-    rol.descripcion = req.body.descripcion || rol.descripcion;
+    rol.name = req.body.name || rol.name;
+    rol.description = req.body.description || rol.description;
 
     try {
         const rolAlmacenado = await rol.save();

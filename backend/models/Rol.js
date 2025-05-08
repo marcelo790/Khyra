@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
 
 const rolSchema = mongoose.Schema({
-    nombre: {
+    name: {
         type: String,
         trim: true,
         require: true
     },
-    descripcion: {
+    description: {
         type: String,
         trim: true,
         require: true
     },
-    permisos: [
+    permission: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Permissions'
+            ref: 'Permission'
         }
     ]
 },{

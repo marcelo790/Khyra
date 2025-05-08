@@ -26,10 +26,10 @@ export default function TablaUsuarios({handleClickDesplegar, usuarios}) {
                             <tr className="border-b border-slate-400 font-bold transition duration-300 ease-in-out hover:bg-white dark:border-black 
                             dark:hover:bg-neutral-600" key={user._id}>
                                 <td className="whitespace-nowrap px-6 py-4">{contador++}</td>
-                                <td className="whitespace-nowrap px-6 py-4">{user.nombre}</td>
+                                <td className="whitespace-nowrap px-6 py-4">{user.name}</td>
                                 <td className="whitespace-nowrap px-6 py-4">{user.email}</td>
-                                <td className="whitespace-nowrap px-6 py-4">{user.estado}</td>
-                                <td className="whitespace-nowrap px-6 py-4">{user.rol.nombre}</td>
+                                <td className="whitespace-nowrap px-6 py-4">{user.state}</td>
+                                <td className="whitespace-nowrap px-6 py-4">{user.rol.name}</td>
                                 <td className="whitespace-nowrap px-6 py-4">
                                 <ButtonsUsuarios handleClickDesplegar={handleClickDesplegar} id={user._id} />
                                 </td>

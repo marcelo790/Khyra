@@ -16,7 +16,7 @@ const NuevoPassword = () => {
   useEffect(() => {
       const comprobarToken = async () => {
         try {
-          await clienteAxios.get(`/usuarios/olvide-password/${token}`);
+          await clienteAxios.get(`/user/forget-password/${token}`);
           setTokenValido(true);
         } catch (error) {
           setAlerta({

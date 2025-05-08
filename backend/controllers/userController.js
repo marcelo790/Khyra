@@ -1,4 +1,4 @@
-import Usuario from '../models/Usuario.js';
+import Usuario from '../models/User.js';
 import Rol from '../models/Rol.js';
 import generarId from '../helpers/generarId.js';
 import generarJwt from '../helpers/generarJwt.js';
@@ -24,7 +24,7 @@ const registrar = async (req, res) => {
             //Enviar email de confirmación
             emailRegistro({
                 email: usuario.email,
-                nombre: usuario.nombre,
+                name: usuario.name,
                 token: usuario.token
             });
             res.json(usuarioAlmacenado);
@@ -51,7 +51,7 @@ const editar = async(req, res) => {
         const error = new Error("No existe usuario");
         return res.status(404).json({msg: error.message})
     }
-    usuario.nombre = req.body.nombre || usuario.nombre;
+    usuario.name = req.body.name || usuario.name;
     usuario.email = req.body.email || usuario.email;
     usuario.rol = req.body.rol || usuario.rol;
     try {
@@ -99,24 +99,24 @@ const autenticar = async (req, res) => {
         return res.status(404).json({msg: error.message})
     }
     // Comprobar si usuario esta confirmado
-    if(!usuario.confirmado){
+    if(!usuario.confirmed){
         const error = new Error("Tu cuenta no ha sido confirmada");
         return res.status(404).json({msg: error.message})
     }
     // Comprobar si usuario esta su estado activo
-    if(usuario.estado === 'Inactivo'){
+    if(usuario.state === 'INACTIVO'){
         const error = new Error("Tu cuenta esta Inactiva");
         return res.status(404).json({msg: error.message})
-    }else if(usuario.estado === 'Bloqueado'){
+    }else if(usuario.state === 'BLOQUEADO'){
         const error = new Error("Tu cuenta esta Bloqueada");
         return res.status(404).json({msg: error.message});
     }
     //Comprobar si tu password es correcto
     if(await usuario.comprobarPassword(password)){
-        usuario.estado_sesion = true;
+        usuario.state_session = true;
         res.json({
             _id : usuario._id,
-            nombre: usuario.nombre,
+            name: usuario.name,
             email: usuario.email,
             token: generarJwt(usuario._id)
         });
@@ -135,9 +135,9 @@ const confirmar = async (req, res) => {
         return res.status(403).json({msg: error.message});
     }
     try {
-        usuarioConfirmar.confirmado = true;
+        usuarioConfirmar.confirmed = true;
         usuarioConfirmar.token = "";
-        usuarioConfirmar.estado = "Activo"
+        usuarioConfirmar.state = "ACTIVO"
         await usuarioConfirmar.save();
         res.json({msg: "Usuario Confirmado Correctamente"})
     } catch (error) {
@@ -156,11 +156,11 @@ const resetearPassword = async (req, res) => {
 
     try {
         usuario.token = generarId();
-        usuario.estado = "Inactivo";
+        usuario.state = "INACTIVO";
         await usuario.save();
         emailOlvidePassword({
             email: usuario.email,
-            nombre: usuario.nombre,
+            nombre: usuario.name,
             token: usuario.token
         })
         res.json({msg: "Hemos enviado un email con las intrucciones"});
@@ -189,7 +189,7 @@ const nuevoPassword = async (req, res) => {
     if(usuario){
         usuario.password = password;
         usuario.token = "";
-        usuario.estado = "Activo";
+        usuario.state = "ACTIVO";
         try {
             await usuario.save();
             res.json({msg: "Password modificado correctamente"});

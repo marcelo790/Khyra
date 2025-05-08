@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const permisoSchema = mongoose.Schema({
-    nombre: {
+const permissionSchema = mongoose.Schema({
+    name: {
         type: String,
         trim: true,
         require: true
     },
-    descripcion: {
+    description: {
         type: String,
         trim: true,
         require: true
@@ -14,12 +14,12 @@ const permisoSchema = mongoose.Schema({
     roles: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Roles'
+            ref: 'Role'
         }
     ]
 },{
     timestamps: true
 });
 
-const Permiso = mongoose.model("Permission", permisoSchema);
-export default Permiso;
+const Permission = mongoose.model("Permission", permissionSchema);
+export default Permission;

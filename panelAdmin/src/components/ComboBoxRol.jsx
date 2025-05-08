@@ -8,7 +8,7 @@ export default function ComboBoxRol({roles,handleSubmitRol}) {
   useEffect(() => {
     if(contador < 2){
       const data = roles.map(r => ({
-        text: r.nombre, value: r._id    
+        text: r.name, value: r._id    
     }));
     setRol(prevRol => [...prevRol, ...data]);
     }

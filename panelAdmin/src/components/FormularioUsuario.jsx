@@ -8,7 +8,7 @@ import Alerta from './Alerta'
 function FormularioUsuario() {
 
     const [id, setId] = useState(null);
-    const [nombre, setNombre] = useState('');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [repetirPassword, setRepetirPassword] = useState('');
@@ -23,7 +23,7 @@ function FormularioUsuario() {
     useEffect( () => {
       if(params.id){
         setId(usuario._id)
-        setNombre(usuario.nombre)
+        setName(usuario.name)
         setEmail(usuario.email)
         setOcultarInput(true);
       }
@@ -36,7 +36,7 @@ function FormularioUsuario() {
     const handleSubmit = async e => {
       e.preventDefault();
 
-      if([nombre,email,password,repetirPassword].includes('') && id == null){
+      if([name,email,password,repetirPassword].includes('') && id == null){
         mostrarAlerta({
           msg: 'Todos los campos son requeridos',
           error: true
@@ -66,7 +66,7 @@ function FormularioUsuario() {
         return 
       }
       //console.log({id,nombre, email, password, rol})
-      await submitUsuario({id,nombre, email, password, rol});
+      await submitUsuario({id,name, email, password, rol});
       limpiarInput();
         
     }
@@ -81,7 +81,7 @@ function FormularioUsuario() {
 
     const limpiarInput = () =>{
       setId(null)
-      setNombre('')
+      setName('')
       setEmail('')
       setPassword('')
       setRepetirPassword('')
@@ -96,12 +96,12 @@ function FormularioUsuario() {
         <div>           
             <div className="my-2">
                <input
-                  id="nombre" 
+                  id="name" 
                   type="text"
                   placeholder="Ingrese su nombre completo"
                   className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                  value={nombre}
-                  onChange={e => setNombre(e.target.value)}
+                  value={name}
+                  onChange={e => setName(e.target.value)}
               />
             </div>
             <div className="my-2">

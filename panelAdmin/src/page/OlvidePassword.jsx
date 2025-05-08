@@ -17,7 +17,7 @@ const OlvidePassword = () => {
       return
     }
     try {
-      const {data} = await clienteAxios.post(`/usuarios/olvide-password`, {
+      const {data} = await clienteAxios.post(`/user/forget-password`, {
         email});
         setAlerta({
           msg: data.msg,

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-const accionSchema = mongoose.Schema({
-    nombre: {
+const actionSchema = mongoose.Schema({
+    name: {
         type: String,
         trim: true,
         require: true
@@ -11,5 +11,5 @@ const accionSchema = mongoose.Schema({
     timestamps: true
 });
 
-const Accion = mongoose.model("Action", accionSchema);
-export default Accion;
+const Action = mongoose.model("Action", actionSchema);
+export default Action;

@@ -1,4 +1,4 @@
-import Permiso from '../models/Permiso.js';
+import Permiso from '../models/Permission.js';
 
 const registrarPermiso = async (req, res) => {
     const permiso = new Permiso(req.body);
