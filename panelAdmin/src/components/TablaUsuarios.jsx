@@ -1,8 +1,9 @@
-import { ButtonsUsuarios } from './ButtonsUsuarios';
+import { ButtonsAcciones } from './ButtonsAcciones';
+import { StateButtonUsuario } from './StateButtonUsuario';
 
 export default function TablaUsuarios({handleClickDesplegar, usuarios}) { 
 
-    let contador = 1;
+  let contador = 1
 
     return (
         <div className="flex flex-col">
@@ -28,10 +29,12 @@ export default function TablaUsuarios({handleClickDesplegar, usuarios}) {
                                 <td className="whitespace-nowrap px-6 py-4">{contador++}</td>
                                 <td className="whitespace-nowrap px-6 py-4">{user.name}</td>
                                 <td className="whitespace-nowrap px-6 py-4">{user.email}</td>
-                                <td className="whitespace-nowrap px-6 py-4">{user.state}</td>
-                                <td className="whitespace-nowrap px-6 py-4">{user.rol.name}</td>
                                 <td className="whitespace-nowrap px-6 py-4">
-                                <ButtonsUsuarios handleClickDesplegar={handleClickDesplegar} id={user._id} />
+                                  <StateButtonUsuario id={user._id} state={user.state}/>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4">{user.rol?.name || 'Sin rol asignado'}</td>
+                                <td className="whitespace-nowrap px-6 py-4">
+                                <ButtonsAcciones handleClickDesplegar={handleClickDesplegar} id={user._id} type='Usuario' />
                                 </td>
                             </tr>
                         )

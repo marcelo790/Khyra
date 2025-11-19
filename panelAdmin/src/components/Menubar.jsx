@@ -24,11 +24,35 @@ function Menubar() {
                     </Link>
                 </li>
                 <li>
-                    <Link to="/olvide-password" className="flex items-center p-2 text-black rounded-lg dark:text-black hover:bg-orange-600  dark:hover:bg-white group">
+                    <Link to="lista-categorias" className="flex items-center p-2 text-black rounded-lg dark:text-black hover:bg-orange-600  dark:hover:bg-white group">
                         <svg className="w-5 h-5 text-black transition duration-75 dark:text-black group-hover:text-white dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
                             <path fillRule="evenodd" d="M10 2a3 3 0 0 0-3 3v1H5a3 3 0 0 0-3 3v2.4l1.4.7a7.7 7.7 0 0 0 .7.3 21 21 0 0 0 16.4-.3l1.5-.7V9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3h-4Zm5 4V5c0-.6-.4-1-1-1h-4a1 1 0 0 0-1 1v1h6Zm6.4 7.9.6-.3V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-5.4l.6.3a10 10 0 0 0 .7.3 23 23 0 0 0 18-.3h.1L21 13l.4.9ZM12 10a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z" clipRule="evenodd"/>
                         </svg>
                         <span className="ms-3 group-hover:text-white dark:hover:bg-white group">Categorias</span>
+                    </Link>
+                </li>                
+                <li>
+                    <Link to="lista-subcategorias" className="flex items-center p-2 text-black rounded-lg dark:text-black hover:bg-orange-600  dark:hover:bg-white group">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6 text-black transition duration-75 group-hover:text-white">
+                            <path d="M4 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm1 3a1 1 0 0 1 1-1h4V6H6a1 1 0 0 1 0-2h4a2 2 0 0 1 2 2v2h4a1 1 0 0 1 1 1v1h2V9a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1h-2v2a1 1 0 0 1-1 1h-4v2a2 2 0 0 1-2 2H6a1 1 0 1 1 0-2h4v-2H6a1 1 0 0 1-1-1V9z"/>
+                        </svg>
+                        <span className="ms-3 group-hover:text-white dark:hover:bg-white group">Subcategorias</span>
+                    </Link>
+                </li>
+                <li>
+                    <Link to="lista-juegos" className="flex items-center p-2 text-black rounded-lg dark:text-black hover:bg-orange-600  dark:hover:bg-white group">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6 text-black transition duration-75 group-hover:text-white">
+                            <path d="M6 6c-3.3 0-6 2.7-6 6s2.7 6 6 6c1.3 0 2.4-.4 3.3-1.2.3-.2.7-.3 1-.2s.6.3.8.6l.9 1.4c.2.3.6.5 1 .5s.8-.2 1-.5l.9-1.4c.2-.3.5-.5.8-.6.3-.1.7 0 1 .2.9.8 2 1.2 3.3 1.2 3.3 0 6-2.7 6-6s-2.7-6-6-6c-1.7 0-3.3.7-4.4 1.9-.2.2-.5.3-.8.3s-.6-.1-.8-.3C9.3 6.7 7.7 6 6 6zm2 3c.6 0 1 .4 1 1v1h1c.6 0 1 .4 1 1s-.4 1-1 1H9v1c0 .6-.4 1-1 1s-1-.4-1-1v-1H6c-.6 0-1-.4-1-1s.4-1 1-1h1v-1c0-.6.4-1 1-1zm9 2c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1zm3 0c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1z"/>
+                        </svg>
+                        <span className="ms-3 group-hover:text-white dark:hover:bg-white group">Juegos</span>
+                    </Link>
+                </li>
+                <li>
+                    <Link to="lista-objetos" className="flex items-center p-2 text-black rounded-lg dark:text-black hover:bg-orange-600  dark:hover:bg-white group">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6 text-black transition duration-75 group-hover:text-white">
+                            <path d="M12 2L3 6.5v11L12 22l9-4.5v-11L12 2zm0 2.1l7 3.5-7 3.5-7-3.5 7-3.5zm0 15.8l-7-3.5v-6.3l7 3.5v6.3zm2-6.3l7-3.5v6.3l-7 3.5v-6.3z"/>
+                        </svg>
+                        <span className="ms-3 group-hover:text-white dark:hover:bg-white group">Objetos</span>
                     </Link>
                 </li>
                 <li>

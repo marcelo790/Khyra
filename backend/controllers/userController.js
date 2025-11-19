@@ -55,13 +55,36 @@ const editar = async(req, res) => {
     usuario.email = req.body.email || usuario.email;
     usuario.rol = req.body.rol || usuario.rol;
     try {
-        const usuarioEditado = await usuario.save()
+        let usuarioEditado = await usuario.save();
+        usuarioEditado = await Usuario.findById(id).populate('rol');
         res.json(usuarioEditado);
     } catch (error) {
         return res.status(404).json({msg: error.message})
     }
     
 }
+
+const editarState = async (req, res) => {
+    const { id } = req.params;
+    const { state } = req.body;
+    try {
+        const usuario = await Usuario.findById(id);
+        if (!usuario) {
+            return res.status(404).json({ msg: "No existe el usuario" });
+        }
+        if (!state) {
+            return res.status(400).json({ msg: "El estado es requerido" });
+        }
+        usuario.state = state;
+        let usuarioEditado = await usuario.save();
+        usuarioEditado = await Usuario.findById(id).populate('rol');
+        res.json(usuarioEditado);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: "Error al actualizar el estado del usuario" });
+    }
+};
+
 
 const eliminar = async(req, res) => {
     const {id} = req.params;
@@ -211,6 +234,7 @@ const perfil = async (req, res) =>{
 export {
     registrar,
     editar,
+    editarState,
     eliminar,
     autenticar,
     confirmar,

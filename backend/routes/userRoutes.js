@@ -2,6 +2,7 @@ import express from 'express';
 import {
     registrar, 
     editar,
+    editarState,
     eliminar,
     listar,
     listarByUsuario,
@@ -18,6 +19,7 @@ const router = express.Router();
 
 router.post("/create",checkAuth, registrar);
 router.put("/update/:id", checkAuth, editar);
+router.put("/update-state/:id", checkAuth, editarState);
 router.delete("/delete/:id", checkAuth, eliminar);
 router.get("/list-users", checkAuth, listar);
 router.get("/list-users/:id", checkAuth, listarByUsuario);

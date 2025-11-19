@@ -4,7 +4,7 @@ import { registrarPermiso, listadoPermisos } from "../controllers/permisoControl
 
 const router = express.Router();
 
-router.post("/",checkAuth, registrarPermiso);
-router.get("/",checkAuth, listadoPermisos);
+router.post("/create",checkAuth, registrarPermiso);
+router.get("/list-permission",checkAuth, listadoPermisos);
 
 export default router;

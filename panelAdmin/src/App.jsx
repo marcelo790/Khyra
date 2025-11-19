@@ -3,7 +3,6 @@ import { AdministradorProvider } from './context/AdministradorProvider';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthLayout from "./layouts/AuthLayout";
 import Login from "./page/Login";
-import RegistrarUsuario from "./page/RegistrarUsuario";
 import OlvidePassword from "./page/OlvidePassword";
 import NuevoPassword from "./page/NuevoPassword";
 import ConfirmarCuenta from "./page/ConfirmarCuenta";
@@ -11,6 +10,8 @@ import RutaProtegida from './layouts/RutaProtegida';
 import Administrador from './page/Administrador';
 import ListaUsuarios from './page/ListaUsuarios';
 import "tw-elements-react/dist/css/tw-elements-react.min.css";
+import ListaRoles from './page/ListaRoles';
+import ListaCategorias from './page/ListaCategorias';
 
 function App() {
 
@@ -29,7 +30,11 @@ function App() {
               <Route path="/admin" element={<RutaProtegida/>}>
                 <Route index element={<Administrador/>}/>                
                 <Route path="lista-usuarios" element={<ListaUsuarios/>}/>
-                <Route path="lista-usuarios/:id" element={<ListaUsuarios/>}/>
+                <Route path="lista-usuarios/:id" element={<ListaUsuarios/>}/>                
+                <Route path="lista-roles" element={<ListaRoles/>}/>
+                <Route path="lista-roles/:id" element={<ListaRoles/>}/>
+                <Route path="lista-categorias" element={<ListaCategorias/>}/>
+                <Route path="lista-categorias/:id" element={<ListaCategorias/>}/>
               </Route>
             </Routes>
           </AdministradorProvider>

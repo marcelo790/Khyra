@@ -4,7 +4,7 @@ const actionSchema = mongoose.Schema({
     name: {
         type: String,
         trim: true,
-        require: true
+        required: true
     }
 }
 ,{

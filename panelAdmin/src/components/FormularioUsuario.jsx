@@ -20,14 +20,14 @@ function FormularioUsuario() {
     const navigate = useNavigate();
     const {mostrarAlerta, alerta, submitUsuario,roles, usuario,handleClickDesplegar} = useAdministrador();
 
-    useEffect( () => {
-      if(params.id){
-        setId(usuario._id)
-        setName(usuario.name)
-        setEmail(usuario.email)
+    useEffect(() => {
+      if (params.id && usuario && usuario._id === params.id) {
+        setId(usuario._id);
+        setName(usuario.name || '');
+        setEmail(usuario.email || '');
         setOcultarInput(true);
       }
-    }, [params])
+    }, [params.id, usuario]);
 
     const handleSubmitRol = (e) =>{
       setRol(e.value)
@@ -100,7 +100,7 @@ function FormularioUsuario() {
                   type="text"
                   placeholder="Ingrese su nombre completo"
                   className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                  value={name}
+                  value={name || ''} 
                   onChange={e => setName(e.target.value)}
               />
             </div>
@@ -110,7 +110,7 @@ function FormularioUsuario() {
                   type="email"
                   placeholder="Ingrese su correo electrónico"
                   className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                  value={email}
+                  value={email || ''}
                   onChange={e => setEmail(e.target.value)}
               />
             </div>
@@ -120,7 +120,7 @@ function FormularioUsuario() {
                   type={ocultarInput ? "hidden" :"password"}
                   placeholder="Ingrese su contraseña"
                   className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                  value={password}
+                  value={password || ''}
                   onChange={e => setPassword(e.target.value)}
               />
             </div>
@@ -130,7 +130,7 @@ function FormularioUsuario() {
                   type={ocultarInput ? "hidden" :"password"}
                   placeholder="Repetir su contraseña"
                   className="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md"
-                  value={repetirPassword}
+                  value={repetirPassword || ''}
                   onChange={e => setRepetirPassword(e.target.value)}
               />
             </div>

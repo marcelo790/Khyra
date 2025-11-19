@@ -2,11 +2,18 @@ import FormularioUsuario from "../components/FormularioUsuario";
 import { TECollapse } from "tw-elements-react";
 import TablaUsuarios from "../components/TablaUsuarios";
 import useAdministradores from "../hooks/useAdministradores";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const ListaUsuarios = () => {
 
-    const {usuarios,handleClickDesplegar,activeElement} = useAdministradores();
+    const {usuarios,handleClickDesplegar,activeElement,setActiveElement} = useAdministradores();
+
+    useEffect(() => {
+    return () => {
+        setActiveElement(""); // Reset al desmontar componente
+    };
+    }, []);
+    
 
     return (
         <>          
