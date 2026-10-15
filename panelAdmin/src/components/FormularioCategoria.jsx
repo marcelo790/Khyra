@@ -4,7 +4,7 @@ import useAdministrador from '../hooks/useAdministradores';
 import Alerta from './Alerta'
 
 
-function FormularioCategoria() {
+function FormularioCategoria({onClose }) {
 
     const [id, setId] = useState(null);
     const [name, setName] = useState('');
@@ -19,12 +19,18 @@ function FormularioCategoria() {
 
     useEffect(() => {
       if (params.id && categoria && categoria._id === params.id) {
+        // Modo edición
         setId(categoria._id);
         setName(categoria.name || '');
         setImagePreview(categoria.image || '');
+        setImageFile(null);
         setOcultarInput(true);
+      } else if (!params.id) {
+        // Modo registro
+        limpiarInput();
+        setOcultarInput(false);
       }
-    }, [params, categoria]);
+    }, [params.id, categoria]);
 
    const handleImageChange = e => {
     const file = e.target.files[0];
@@ -54,23 +60,24 @@ function FormularioCategoria() {
     }
       await submitCategoria({id,name, 'image':imageFile});
       limpiarInput();
+      if (onClose) onClose();
         
     }
 
     const handledCancelar = e => {
       e.preventDefault();
-      handleClickDesplegar('');
-      setOcultarInput(false);
       limpiarInput();
+      if (onClose) onClose();
       navigate('/admin/lista-categorias')
     }
 
-    const limpiarInput = () =>{
-      setId(null)
-      setName('')      
+    const limpiarInput = () => {
+      setId(null);
+      setName('');
       setImageFile(null);
       setImagePreview('');
-    }
+      setOcultarInput(false);
+    };
 
     const {msg} = alerta;
 
@@ -107,7 +114,7 @@ function FormularioCategoria() {
             <div className='flex justify-center'>
             <input
               type='submit'
-              value={ocultarInput ? "Actualizar" : "Registrar"}
+              value={params.id ? 'Actualizar' : 'Registrar'}
               className='bg-orange-600 w-full mr-3 mb-2 mt-2 py-2 text-white text-sm uppercase font-bold rounded-md
               hover:cursor-pointer hover:bg-orange-800 transition-colors'
             />

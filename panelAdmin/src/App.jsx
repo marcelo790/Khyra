@@ -12,6 +12,7 @@ import ListaUsuarios from './page/ListaUsuarios';
 import "tw-elements-react/dist/css/tw-elements-react.min.css";
 import ListaRoles from './page/ListaRoles';
 import ListaCategorias from './page/ListaCategorias';
+import ListaSubCategorias from './page/ListaSubCategorias';
 
 function App() {
 
@@ -35,6 +36,8 @@ function App() {
                 <Route path="lista-roles/:id" element={<ListaRoles/>}/>
                 <Route path="lista-categorias" element={<ListaCategorias/>}/>
                 <Route path="lista-categorias/:id" element={<ListaCategorias/>}/>
+                <Route path="lista-subcategorias" element={<ListaSubCategorias/>}/>
+                <Route path="lista-subcategorias/:id" element={<ListaSubCategorias/>}/>
               </Route>
             </Routes>
           </AdministradorProvider>

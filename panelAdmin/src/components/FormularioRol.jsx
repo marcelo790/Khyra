@@ -4,7 +4,7 @@ import useAdministrador from '../hooks/useAdministradores';
 import Alerta from './Alerta'
 
 
-function FormularioRol() {
+function FormularioRol({onClose }) {
 
     const [id, setId] = useState(null);
     const [name, setName] = useState('');
@@ -21,26 +21,40 @@ function FormularioRol() {
     const {mostrarAlerta, alerta, submitRol,rol,permisos, handleClickDesplegar} = useAdministrador();
 
     useEffect(() => {
-      if (params.id && rol && rol._id && permisos.length > 0) {
-        const permisoIds = rol.permission.map(p => typeof p === 'string' ? p : p._id);
+      if (params.id && rol && rol._id === params.id && permisos.length > 0) {
+        // Modo edición
+        const permisoIds = (rol.permission || []).map(p =>
+          typeof p === 'string' ? p : p._id
+        );
 
-        const asignados = permisos.filter(p => permisoIds.includes(p._id));
-        const disponibles = permisos.filter(p => !permisoIds.includes(p._id));
+        const asignados = permisos.filter(p =>
+          permisoIds.includes(p._id)
+        );
+
+        const disponibles = permisos.filter(p =>
+          !permisoIds.includes(p._id)
+        );
 
         setId(rol._id);
-        setName(rol.name);
-        setDescription(rol.description);
+        setName(rol.name || '');
+        setDescription(rol.description || '');
         setPermisosAsignados(asignados);
         setPermisosDisponibles(disponibles);
-        setOcultarInput(true);
-      }
-      else if (!params.id && permisos.length > 0) {
-        setPermisosDisponibles(permisos);
-        setPermisosAsignados([]);
         setSeleccionAsignados([]);
         setSeleccionDisponibles([]);
+        setOcultarInput(true);
+      } else if (!params.id) {
+        // Modo registro
+        setId(null);
+        setName('');
+        setDescription('');
+        setPermisosAsignados([]);
+        setPermisosDisponibles(permisos);
+        setSeleccionAsignados([]);
+        setSeleccionDisponibles([]);
+        setOcultarInput(false);
       }
-    }, [params, permisos, rol]);
+    }, [params.id, permisos, rol]);
 
    
     const moverADerecha = () => {
@@ -95,21 +109,21 @@ function FormularioRol() {
 
     const handledCancelar = e => {
       e.preventDefault();
-      handleClickDesplegar('');
-      setOcultarInput(false);
       limpiarInput();
+      if (onClose) onClose();
       navigate('/admin/lista-roles')
     }
 
-    const limpiarInput = () =>{
-      setId(null)
-      setName('')
-      setDescription('')
+    const limpiarInput = () => {
+      setId(null);
+      setName('');
+      setDescription('');
       setPermisosAsignados([]);
       setPermisosDisponibles([...permisos]);
       setSeleccionAsignados([]);
       setSeleccionDisponibles([]);
-    }
+      setOcultarInput(false);
+    };
 
     const {msg} = alerta;
 
@@ -199,7 +213,7 @@ function FormularioRol() {
             <div className='flex justify-center'>
             <input
               type='submit'
-              value={ocultarInput ? "Actualizar" : "Registrar"}
+              value={params.id ? 'Actualizar' : 'Registrar'}
               className='bg-orange-600 w-full mr-3 mb-2 mt-2 py-2 text-white text-sm uppercase font-bold rounded-md
               hover:cursor-pointer hover:bg-orange-800 transition-colors'
             />

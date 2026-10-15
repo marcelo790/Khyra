@@ -6,13 +6,22 @@ import FormularioCategoria from '../components/FormularioCategoria';
 
 const ListaCategorias = () => {
 
-    const {categorias,handleClickDesplegar,activeElement,setActiveElement} = useAdministradores();    
+    const {categorias} = useAdministradores();    
+
+    const [activeElement, setActiveElement] = useState("");
+    const [categoriaSeleccionado, setCategoriaSeleccionado] = useState(null);
+
+    const handleClickDesplegar = (valor, categoriaNuevo = null) => {
+        setActiveElement(valor);
+        setCategoriaSeleccionado(categoriaNuevo); // null = nuevo usuario
+    };
 
     useEffect(() => {
-    return () => {
-        setActiveElement(""); // Reset al desmontar componente
-    };
+        return () => {
+            setActiveElement(""); // reset al desmontar
+        };
     }, []);
+
 
     return (
         <>          
@@ -23,7 +32,9 @@ const ListaCategorias = () => {
                         style={activeElement ? {pointerEvents: "none"} : {pointerEvents: ""}}
                         value="Agregar Categoria"
                         className="bg-orange-600 w-full mb-5 mt-5 py-2 text-white text-sm uppercase font-bold rounded-xl hover:cursor-pointer hover:bg-orange-800 transition-colors"
-                        onClick={() => handleClickDesplegar('Activar')}
+                        onClick={() => {                            
+                            handleClickDesplegar('Activar', null); // <-- abrir modal para nuevo usuario
+                        }}
                         aria-expanded="true"
                         aria-controls="collapseOne"                     
                     />
@@ -38,7 +49,10 @@ const ListaCategorias = () => {
             show={activeElement === "Activar"}
             className="!mt-0 !rounded-b-none !shadow-none transition-all duration-500">
                 <div className="mt-2 flex justify-center">
-                    <FormularioCategoria/>
+                    <FormularioCategoria
+                        categoria={categoriaSeleccionado}
+                        onClose={() => handleClickDesplegar("")}
+                    />
                 </div>
             </TECollapse>
             <div className="w-full">

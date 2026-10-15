@@ -2,704 +2,383 @@ import { useState, useEffect, createContext } from "react";
 import clienteAxios from "../config/clienteAxios";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "../config/firebaseConfig";
 
 const AdministradorContext = createContext();
 
+/* ===================== HELPERS ===================== */
 
+const getAuthConfig = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    return {
+        headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    };
+};
 
-const AdministradorProvider = ({children}) =>{
+const subirArchivoFirebase = async (archivo, carpeta) => {
+    const nombre = `${Date.now()}-${archivo.name}`;
+    const storageRef = ref(storage, `${carpeta}/${nombre}`);
+    await uploadBytes(storageRef, archivo, { contentType: archivo.type });
+    return await getDownloadURL(storageRef);
+};
 
-    const { auth } = useAuth()
-    
+const eliminarArchivoFirebase = async (url) => {
+    if (!url) return;
+    const path = decodeURIComponent(url.split("/o/")[1].split("?")[0]);
+    await deleteObject(ref(storage, path));
+};
+
+/* ===================== PROVIDER ===================== */
+
+const AdministradorProvider = ({ children }) => {
+    const { auth } = useAuth();
+    const navigate = useNavigate();
+
     const [alerta, setAlerta] = useState({});
-    const [eliminarUser, setEliminarUser] = useState(false)
-    const [usuario, setUsuario] = useState({});
+    const [cargando, setCargando] = useState(false);
+    const [activeElement, setActiveElement] = useState("");
+
     const [usuarios, setUsuarios] = useState([]);
+    const [usuario, setUsuario] = useState({});
     const [roles, setRoles] = useState([]);
     const [rol, setRol] = useState({});
     const [categorias, setCategorias] = useState([]);
     const [categoria, setCategoria] = useState({});
+    const [subcategorias, setSubCategorias] = useState([]);
+    const [subcategoria, setSubCategoria] = useState({});
+    const [objetos, setObjetos] = useState([]);
+    const [objeto, setObjeto] = useState({});
     const [permisos, setPermisos] = useState([]);
-    const [permiso, setPermiso] = useState({});
-    const [cargando, setCargando] = useState(false);
-    const [activeElement, setActiveElement] = useState("");
 
-    const navigate = useNavigate();
+    /* ===================== UI HELPERS ===================== */
+    const mostrarAlerta = ({ msg, error = false }) => {
+    setAlerta({ msg, error });
+    setTimeout(() => setAlerta({}), 3000); // opcional: limpiar después de 3s
+  };
+
+    const successFlow = (msg, path) => {
+        setAlerta({ msg, error: false });
+        setTimeout(() => {
+            setAlerta({});
+            if (path) navigate(path);
+            setActiveElement("");
+        }, 3000);
+    };
+
+    const errorFlow = (error, fallback) => {
+        setAlerta({
+            msg: error?.response?.data?.msg || fallback,
+            error: true,
+        });
+    };
+
+    /* ===================== INIT ===================== */
 
     useEffect(() => {
-        const obtenerUsuarios = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if(!token) return
+        const fetchData = async () => {
+            const config = getAuthConfig();
+            if (!config) return;
 
-                const config = {
-                    headers: {
-                        "Content-type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-                const {data} = await clienteAxios('/user/list-users', config);
-                setUsuarios(data)
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        obtenerUsuarios();
-        const obtenerRoles = async () => {
             try {
-                const token = localStorage.getItem('token');
-                if(!token) return
+                const [u, r, p, c] = await Promise.all([
+                    clienteAxios("/user/list-users", config),
+                    clienteAxios("/rol/list-roles", config),
+                    clienteAxios("/permission/list-permission", config),
+                    clienteAxios("/category/list-categorias", config),
+                ]);
 
-                const config = {
-                    headers: {
-                        "Content-type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-                const {data} = await clienteAxios('/rol/list-roles', config);
-                setRoles(data)
+                setUsuarios(u.data);
+                setRoles(r.data);
+                setPermisos(p.data);
+                setCategorias(c.data);
             } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });
+                console.error(error);
             }
-        }        
-        obtenerRoles();
-        const obtenerPermisos = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if(!token) return
+        };
 
-                const config = {
-                    headers: {
-                        "Content-type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-                const {data} = await clienteAxios('/permission/list-permission', config);
-                setPermisos(data)
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });
-            }
-        }
-        obtenerPermisos();
-        const obtenerCategorias = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if(!token) return
-
-                const config = {
-                    headers: {
-                        "Content-type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-                const {data} = await clienteAxios('/category/list-categorias', config);
-                setCategorias(data)
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });
-            }
-        }        
-        obtenerCategorias();
+        fetchData();
     }, [auth]);
 
-    const mostrarAlerta = alerta =>{
-        setAlerta(alerta);
-        setTimeout(() => {
-            setAlerta({})
-        }, 4000);
-    }
-    const submitUsuario = async usuario =>{
-        if(usuario.id){
-            await editarUsuario(usuario);
-        }else{
-            await nuevoUsuario(usuario);
-        }
-        
-    }
+    /* ===================== USUARIOS ===================== */
 
-    const editarUsuario = async usuario => {
+    const submitUsuario = (data) =>
+        data.id ? editarUsuario(data) : nuevoUsuario(data);
+
+    const nuevoUsuario = async (data) => {
         try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.put(`/user/update/${usuario.id}`, usuario, config);
-            const usuariosActualizados = usuarios.map(usuarioState => usuarioState._id === data._id ? data : usuarioState)
-            setUsuarios(usuariosActualizados);
-            setAlerta({
-                msg: 'Usuario Actualizado Correctamente',
-                error: false
-            });            
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-usuarios');
-                setActiveElement('') 
-            }, 3000); 
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });
-                setActiveElement('Activar');
-            }  
-    }
-
-    const editarStateUsuario = async (id, nuevoEstado) => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-    
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            };
-    
-            const payload = {
-                state: nuevoEstado
-            };
-    
-            const { data } = await clienteAxios.put(`/user/update-state/${id}`, payload, config);
-    
-            const usuariosActualizados = usuarios.map(usuarioState =>
-                usuarioState._id === data._id ? data : usuarioState
-            );
-            
-            setUsuarios(usuariosActualizados);
-            if (auth._id === id && (nuevoEstado === 'BLOQUEADO' || nuevoEstado === 'INACTIVO')) {
-                localStorage.removeItem('token');
-                cerrarSesionUsuarios();
-                navigate('/');
-                return;
-            }
-    
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-usuarios');
-                setActiveElement('');
-            }, 3000);
-    
+            const config = getAuthConfig();
+            if (!config) return;
+            const res = await clienteAxios.post("/user/create", data, config);
+            setUsuarios([...usuarios, res.data]);
+            successFlow("Usuario creado correctamente", "admin/lista-usuarios");
         } catch (error) {
-            setAlerta({
-                msg: error.response?.data?.msg || "Error al actualizar estado",
-                error: true
-            });
-            setActiveElement('Activar');
-        }
-    };
-    
-
-    const nuevoUsuario = async usuario => {
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.post('/user/create', usuario, config);
-            setUsuarios([...usuarios, data]);
-            setAlerta({
-                msg: 'Usuario Creado Correctamente',
-                error: false
-            });   
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-usuarios');
-                setActiveElement('') 
-            }, 3000);           
-               
-        } catch (error) {
-            setAlerta({
-                msg: error.response.data.msg,
-                error: true
-            });
-            setActiveElement('Activar');
-        }         
-    }
-
-    const eliminarUsuario = async id => {
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.delete(`/user/delete/${id}`, config);
-            const usuariosActualizados = usuarios.filter(usuarioFilter => usuarioFilter._id !== id );
-            setUsuarios(usuariosActualizados);
-            // Cierra sesión si se elimina a sí mismo
-            if (auth._id === id) {
-                localStorage.removeItem('token');
-                cerrarSesionUsuarios();
-                navigate('/');
-                return;
-            }
-            setAlerta({
-                msg: data.msg,
-                error: false
-            });            
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-usuarios');
-                setActiveElement('') 
-            }, 3000); 
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });                
-                setActiveElement('Activar');
-            }  
-    }
-
-    const obtenerUsuario = async id => {
-        setCargando(true);
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.get(`/user/list-users/${id}`, config);
-            setUsuario(data)
-        } catch (error) {
-            setAlerta({
-                msg: error.response.data.msg,
-                error: true
-            });
-        }        
-        setTimeout(() => {
-            setAlerta({});
-            setCargando(false);
-        }, 2000);   
-        
-    }
-    /*Roles */
-    const submitRol = async rol =>{
-        if(rol.id){
-            await editarRol(rol);
-        }else{
-            await nuevoRol(rol);
-        }
-        
-    }
-    const nuevoRol = async rol => {
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.post('/rol/create', rol, config);
-            setRoles([...roles, data]);
-            setAlerta({
-                msg: 'Rol Creado Correctamente',
-                error: false
-            });   
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-roles');
-                setActiveElement('') 
-            }, 3000);           
-               
-        } catch (error) {
-            setAlerta({
-                msg: error.response.data.msg,
-                error: true
-            });
-            setActiveElement('Activar');
-        }         
-    }
-
-
-    const editarRol = async rol => {
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.put(`/rol/update/${rol.id}`, rol, config);
-            const rolesActualizados = roles.map(rolState => rolState._id === data._id ? data : rolState)
-            setRoles(rolesActualizados);
-            setAlerta({
-                msg: 'Rol Actualizado Correctamente',
-                error: false
-            });            
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-roles');
-                setActiveElement('') 
-            }, 3000); 
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });
-                setActiveElement('Activar');
-            }  
-    }
-    const obtenerRol = async id => {
-        setCargando(true);
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.get(`/rol/list-rol/${id}`, config);
-            setRol(data)
-        } catch (error) {
-            setAlerta({
-                msg: error.response.data.msg,
-                error: true
-            });
-        }        
-        setTimeout(() => {
-            setAlerta({});
-            setCargando(false);
-        }, 2000);   
-        
-    }
-
-    const eliminarRol = async id => {
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            const {data} = await clienteAxios.delete(`/rol/delete/${id}`, config);
-            const rolesActualizados = roles.filter(rolFilter => rolFilter._id !== id );
-            setRoles(rolesActualizados);
-            // Cierra sesión si se elimina a sí mismo
-            if (auth._id === id) {
-                localStorage.removeItem('token');
-                cerrarSesionUsuarios();
-                navigate('/');
-                return;
-            }
-            setAlerta({
-                msg: data.msg,
-                error: false
-            });            
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-roles');
-                setActiveElement('') 
-            }, 3000); 
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });                
-                setActiveElement('Activar');
-            }  
-    }
-
-    /*Categorias */
-
-    const submitCategoria = async categoria =>{
-        if(categoria.id){
-            await editarCategoria(categoria);
-        }else{
-            await nuevoCategoria(categoria);
-        }
-        
-    }
-
-    const eliminarImagenFirebase = async (urlImagen) => {
-        try {
-            // Extrae el path desde la URL de descarga
-            const baseUrl = "https://firebasestorage.googleapis.com/v0/b/";
-            const fullPathStart = urlImagen.indexOf(baseUrl) !== -1 
-                ? decodeURIComponent(urlImagen.split("/o/")[1].split("?")[0])
-                : null;
-            
-            if (!fullPathStart) return;
-
-            const imagenRef = ref(storage, fullPathStart);
-            await deleteObject(imagenRef);
-            console.log("Imagen eliminada de Firebase.");
-        } catch (error) {
-            console.error("Error al eliminar imagen de Firebase:", error);
+            errorFlow(error, "Error al crear usuario");
         }
     };
 
-    const subirImagenFirebase = async (archivo, carpeta = 'categorias') => {
+    const editarUsuario = async (data) => {
         try {
-            const nombreArchivo = `${Date.now()}-${archivo.name}`;
-            const storageRef = ref(storage, `${carpeta}/${nombreArchivo}`);
-
-            // Sube el archivo
-            await uploadBytes(storageRef, archivo);
-
-            // Obtiene la URL de descarga
-            const url = await getDownloadURL(storageRef);
-            console.log("URL de descarga generada:", url);
-            return url;
+            const config = getAuthConfig();
+            if (!config) return;
+            const res = await clienteAxios.put(`/user/update/${data.id}`, data, config);
+            setUsuarios(usuarios.map(u => u._id === res.data._id ? res.data : u));
+            successFlow("Usuario actualizado", "admin/lista-usuarios");
         } catch (error) {
-            console.error("Error al subir imagen a Firebase:", error);
-            throw error;
-        }
-        };
-
-    const nuevoCategoria = async (categoria) => {
-    try {
-        const token = localStorage.getItem('token');
-        if(!token) return;
-
-        const config = {
-            headers: {
-                "Content-type": "application/json",
-                Authorization: `Bearer ${token}`
-            }
-        };
-
-        // Si se envió imagen
-        if (categoria.image instanceof File) {
-            const urlImagen = await subirImagenFirebase(categoria.image);
-            categoria.image = urlImagen; // reemplazamos el file por la URL
-        }
-        console.log('categoria: ' + categoria)
-        
-        const { data } = await clienteAxios.post('/category/create', categoria, config);
-        setCategorias([...categorias, data]);
-        console.log('data: ' + data)
-        setAlerta({ msg: 'Categoria Creada Correctamente', error: false });
-        setTimeout(() => {
-            setAlerta({});
-            navigate('admin/lista-categorias');
-            setActiveElement('');
-        }, 3000);
-
-        } catch (error) {
-            setAlerta({
-                msg: error.response?.data?.msg || "Error al crear categoría",
-                error: true
-            });
-            setActiveElement('Activar');
+            errorFlow(error, "Error al editar usuario");
         }
     };
 
-
-    const editarCategoria = async categoria => {
+    const eliminarUsuario = async (id) => {
         try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-
-             if (categoria.image instanceof File) {
-                const urlImagen = await subirImagenFirebase(categoria.image);
-                categoria.image = urlImagen;
-            }
-
-
-            const {data} = await clienteAxios.put(`/category/update/${categoria.id}`, categoria, config);
-            const categoriasActualizados = categorias.map(categoriaState => categoriaState._id === data._id ? data : categoriaState)
-            setCategorias(categoriasActualizados);
-            setAlerta({
-                msg: 'Categoria Actualizado Correctamente',
-                error: false
-            });            
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-categorias');
-                setActiveElement('') 
-            }, 3000); 
-            } catch (error) {
-                setAlerta({
-                    msg: error.response.data.msg,
-                    error: true
-                });
-                setActiveElement('Activar');
-            }  
-    }
-    const obtenerCategoria = async id => {
-        setCargando(true);
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-            
-            const {data} = await clienteAxios.get(`/category/list-categoria/${id}`, config);
-            setCategoria(data)
-        } catch (error) {
-            setAlerta({
-                msg: error.response.data.msg,
-                error: true
-            });
-        }        
-        setTimeout(() => {
-            setAlerta({});
-            setCargando(false);
-        }, 2000);   
-        
-    }
-
-    const eliminarCategoria= async id => {
-        try {
-            const token = localStorage.getItem('token');
-            if(!token) return
-
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-
-            // Primero obtenemos la categoría con su imagen antes de eliminarla
-            const { data: categoria } = await clienteAxios.get(`/category/list-categoria/${id}`, config);
-            const urlImagen = categoria?.image;
-
-            // Eliminamos la categoría
-            const {data} = await clienteAxios.delete(`/category/delete/${id}`, config);
-
-            // Eliminamos la imagen si existe
-            if (urlImagen) {
-                await eliminarImagenFirebase(urlImagen);
-            }
-
-            const categoriasActualizados = categorias.filter(categoriaFilter => categoriaFilter._id !== id );
-            setCategorias(categoriasActualizados);
+            const config = getAuthConfig();
+            if (!config) return;
+            await clienteAxios.delete(`/user/delete/${id}`, config);
+            setUsuarios(usuarios.filter(u => u._id !== id));
 
             if (auth._id === id) {
-                localStorage.removeItem('token');
-                cerrarSesionUsuarios();
-                navigate('/');
+                localStorage.removeItem("token");
+                navigate("/");
                 return;
             }
 
-            setAlerta({
-                msg: data.msg,
-                error: false
-            });            
-            setTimeout(() => {
-                setAlerta({});
-                navigate('admin/lista-categorias');
-                setActiveElement('') 
-            }, 3000); 
+            successFlow("Usuario eliminado", "admin/lista-usuarios");
         } catch (error) {
-            setAlerta({
-                msg: error.response?.data?.msg || "Error al eliminar categoría",
-                error: true
-            });                
-            setActiveElement('Activar');
-        }  
-    };
-
-    const handleClickDesplegar = (value) => {
-        if (value === activeElement) {
-        setActiveElement("");
-        } else {       
-        setActiveElement(value);
+            errorFlow(error, "Error al eliminar usuario");
         }
     };
 
-    const cerrarSesionUsuarios = () => {
-        setUsuarios([])
-        setUsuario({})
-        setAlerta({})
+    /* ===================== ROLES ===================== */
 
-    }
+    const submitRol = (data) =>
+        data.id ? editarRol(data) : nuevoRol(data);
+
+    const nuevoRol = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+            const res = await clienteAxios.post("/rol/create", data, config);
+            setRoles([...roles, res.data]);
+            successFlow("Rol creado", "admin/lista-roles");
+        } catch (error) {
+            errorFlow(error, "Error al crear rol");
+        }
+    };
+
+    const editarRol = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+            const res = await clienteAxios.put(`/rol/update/${data.id}`, data, config);
+            setRoles(roles.map(r => r._id === res.data._id ? res.data : r));
+            successFlow("Rol actualizado", "admin/lista-roles");
+        } catch (error) {
+            errorFlow(error, "Error al editar rol");
+        }
+    };
+
+    /* ===================== CATEGORÍAS ===================== */
+
+    const submitCategoria = (data) =>
+        data.id ? editarCategoria(data) : nuevoCategoria(data);
+
+    const nuevoCategoria = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            if (data.image instanceof File) {
+                data.image = await subirArchivoFirebase(data.image, "categorias");
+            }
+
+            const res = await clienteAxios.post("/category/create", data, config);
+            setCategorias([...categorias, res.data]);
+            successFlow("Categoría creada", "admin/lista-categorias");
+        } catch (error) {
+            errorFlow(error, "Error al crear categoría");
+        }
+    };
+
+    const editarCategoria = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            if (data.image instanceof File) {
+                data.image = await subirArchivoFirebase(data.image, "categorias");
+            }
+
+            const res = await clienteAxios.put(`/category/update/${data.id}`, data, config);
+            setCategorias(categorias.map(c => c._id === res.data._id ? res.data : c));
+            successFlow("Categoría actualizada", "admin/lista-categorias");
+        } catch (error) {
+            errorFlow(error, "Error al editar categoría");
+        }
+    };
+
+    const eliminarCategoria = async (id) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            const { data } = await clienteAxios.get(`/category/list-categoria/${id}`, config);
+            await clienteAxios.delete(`/category/delete/${id}`, config);
+            await eliminarArchivoFirebase(data.image);
+
+            setCategorias(categorias.filter(c => c._id !== id));
+            successFlow("Categoría eliminada", "admin/lista-categorias");
+        } catch (error) {
+            errorFlow(error, "Error al eliminar categoría");
+        }
+    };
+
+    /* ===================== SUBCATEGORÍAS ===================== */
+
+    const submitSubCategoria = (data) =>
+        data.id ? editarSubCategoria(data) : nuevoSubCategoria(data);
+
+    const nuevoSubCategoria = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            if (data.image instanceof File) {
+                data.image = await subirArchivoFirebase(data.image, "subcategorias");
+            }
+
+            const res = await clienteAxios.post("/subcategory/create", data, config);
+            setSubCategorias([...subcategorias, res.data]);
+            successFlow("Subcategoría creada", "admin/lista-subcategorias");
+        } catch (error) {
+            errorFlow(error, "Error al crear subcategoría");
+        }
+    };
+
+    const editarSubCategoria = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            if (data.image instanceof File) {
+                data.image = await subirArchivoFirebase(data.image, "subcategorias");
+            }
+
+            const res = await clienteAxios.put(`/subcategory/update/${data.id}`, data, config);
+            setSubCategorias(subcategorias.map(sc =>
+                sc._id === res.data._id ? res.data : sc
+            ));
+            successFlow("Subcategoría actualizada", "admin/lista-subcategorias");
+        } catch (error) {
+            errorFlow(error, "Error al editar subcategoría");
+        }
+    };
+
+    const eliminarSubCategoria = async (id) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            const { data } = await clienteAxios.get(`/subcategory/list-subcategoria/${id}`, config);
+            await clienteAxios.delete(`/subcategory/delete/${id}`, config);
+            await eliminarArchivoFirebase(data.image);
+
+            setSubCategorias(subcategorias.filter(sc => sc._id !== id));
+            successFlow("Subcategoría eliminada", "admin/lista-subcategorias");
+        } catch (error) {
+            errorFlow(error, "Error al eliminar subcategoría");
+        }
+    };
+
+    /* ===================== OBJETOS ===================== */
+
+    const submitObjeto = (data) =>
+        data.id ? editarObjeto(data) : nuevoObjeto(data);
+
+    const procesarArchivosObjeto = async (data) => {
+        if (data.image instanceof File)
+            data.image = await subirArchivoFirebase(data.image, "objetos");
+
+        if (data.imagesinfondo instanceof File)
+            data.imagesinfondo = await subirArchivoFirebase(data.imagesinfondo, "objetos");
+
+        if (data.audio instanceof File)
+            data.audio = await subirArchivoFirebase(data.audio, "audios");
+    };
+
+    const nuevoObjeto = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            await procesarArchivosObjeto(data);
+            const res = await clienteAxios.post("/object/create", data, config);
+            setObjetos([...objetos, res.data]);
+            successFlow("Objeto creado", "admin/lista-objetos");
+        } catch (error) {
+            errorFlow(error, "Error al crear objeto");
+        }
+    };
+
+    const editarObjeto = async (data) => {
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+
+            await procesarArchivosObjeto(data);
+            const res = await clienteAxios.put(`/object/update/${data.id}`, data, config);
+            setObjetos(objetos.map(o =>
+                o._id === res.data._id ? res.data : o
+            ));
+            successFlow("Objeto actualizado", "admin/lista-objetos");
+        } catch (error) {
+            errorFlow(error, "Error al editar objeto");
+        }
+    };
+
+    /* ===================== CONTEXT ===================== */
+
     return (
         <AdministradorContext.Provider
             value={{
                 usuarios,
                 usuario,
-                mostrarAlerta,
-                alerta,
-                submitUsuario,
-                obtenerUsuario,
+                setUsuario,
                 roles,
                 rol,
+                setRol,
+                categorias,
+                categoria,
+                setCategoria,
+                subcategorias,
+                subcategoria,
+                setSubCategoria,
+                objetos,
+                objeto,
+                setObjeto,
+                permisos,
+                alerta,
                 cargando,
-                handleClickDesplegar,
+                submitUsuario,
+                eliminarUsuario,
+                submitRol,
+                submitCategoria,
+                eliminarCategoria,
+                submitSubCategoria,
+                eliminarSubCategoria,
+                submitObjeto,
                 activeElement,
                 setActiveElement,
-                cerrarSesionUsuarios,
-                eliminarUsuario,
-                setEliminarUser,
-                eliminarUser,
-                editarStateUsuario,
-                obtenerRol,
-                eliminarRol,
-                submitRol,
-                permiso,
-                permisos,
-                categoria,
-                categorias,
-                submitCategoria,
-                obtenerCategoria,
-                nuevoCategoria,
-                editarCategoria,
-                eliminarCategoria
+                mostrarAlerta
             }}
         >
             {children}
         </AdministradorContext.Provider>
-    )
+    );
 };
 
-export {
-    AdministradorProvider
-}
-
+export { AdministradorProvider };
 export default AdministradorContext;

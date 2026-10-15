@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAdministrador from '../hooks/useAdministradores';
+import ComboBoxCategory from './ComboBoxCategory';
 import Alerta from './Alerta'
 
 
@@ -11,8 +12,8 @@ function FormularioSubCategoria() {
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [categoria, setCategoria] = useState('');
-    const [permisosDisponibles, setPermisosDisponibles] = useState([]);
-    const [permisosAsignados, setPermisosAsignados] = useState([]);
+    const [objetosDisponibles, setObjetosDisponibles] = useState([]);
+    const [objetosAsignados, setObjetosAsignados] = useState([]);
     const [seleccionDisponibles, setSeleccionDisponibles] = useState([]);
     const [seleccionAsignados, setSeleccionAsignados] = useState([]);
 
@@ -24,10 +25,7 @@ function FormularioSubCategoria() {
 
     useEffect(() => {
       if (params.id && subcategoria && subcategoria._id === params.id && permisos.length > 0) {
-        const permisoIds = rol.permission.map(p => typeof p === 'string' ? p : p._id);
 
-        const asignados = permisos.filter(p => permisoIds.includes(p._id));
-        const disponibles = permisos.filter(p => !permisoIds.includes(p._id));
         setId(subcategoria._id);
         setName(subcategoria.name || '');
         setImagePreview(subcategoria.image || '');
@@ -66,12 +64,16 @@ function FormularioSubCategoria() {
         
     }
 
+    const handleSubmitCategoria = (e) =>{
+      setCategoria(e.value)
+    }
+
     const handledCancelar = e => {
       e.preventDefault();
       handleClickDesplegar('');
       setOcultarInput(false);
       limpiarInput();
-      navigate('/admin/lista-categorias')
+      navigate('/admin/lista-subcategorias')
     }
 
     const limpiarInput = () =>{
@@ -97,7 +99,10 @@ function FormularioSubCategoria() {
                   value={name || ''}
                   onChange={e => setName(e.target.value)}
               />
-            </div>     
+            </div>    
+            <div className="my-2">
+                <ComboBoxCategory categorias={categorias} handleSubmitCategoria={handleSubmitCategoria}/>
+            </div> 
             <div className="my-2">
                <input
                   id="image" 
